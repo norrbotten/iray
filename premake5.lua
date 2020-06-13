@@ -22,7 +22,13 @@ workspace "iray"
     
     filter { }
 
+function includeGLM()
+    includedirs "ext/glm"
+end
+
 project "iray"
     kind "ConsoleApp"
     files { "src/**.cpp", "src/**.hpp" }
     includedirs "src/"
+
+    includeGLM()

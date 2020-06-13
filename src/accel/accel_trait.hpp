@@ -9,7 +9,9 @@ namespace iray {
     };
 
     template <accel_types Type>
-    struct accel : std::false_type {};
+    struct accel : std::false_type {
+        accel() = delete;
+    };
 
 } // namespace iray
 
