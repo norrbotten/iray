@@ -5,25 +5,23 @@
 
 #include <lodepng.h>
 
+#include "utils/color.hpp"
+
 namespace iray {
 
-    struct color {
-        float r, g, b;
-
-        color operator/(float rhs) {
-            float inv = 1.f / rhs;
-            return color{r * inv, g * inv, b * inv};
-        }
-    };
-
-    class film {
+    class sample_film {
         std::vector<color> data;
         std::vector<int>   samples;
 
         int w, h;
 
     public:
-        film(int width, int height)
+        sample_film()
+            : w(0)
+            , h(0) {
+        }
+
+        sample_film(int width, int height)
             : w(width)
             , h(height) {
 

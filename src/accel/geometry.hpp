@@ -9,10 +9,11 @@
 namespace iray {
 
     struct intersection_result {
-        double     t         = std::numeric_limits<double>::max();
+        double t   = std::numeric_limits<double>::max();
+        bool   hit = false;
+
         glm::dvec3 hitpos    = glm::dvec3();
         glm::dvec3 hitnormal = glm::dvec3();
-        bool       hit       = false;
     };
 
     struct vertex {

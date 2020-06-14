@@ -33,6 +33,10 @@ namespace iray {
             set_dir(glm::dvec3(1, 0, 0));
         }
 
+        void set_fov(float fov) {
+            fov = 1.0 / float(std::tan(0.01745329251f * 0.5f * fov));
+        }
+
         void set_pos(glm::dvec3 pos) {
             this->origin = pos;
         }

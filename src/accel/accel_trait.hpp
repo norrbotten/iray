@@ -2,6 +2,8 @@
 
 #include <type_traits>
 
+#include "renderer/scene.hpp"
+
 namespace iray {
 
     enum class accel_types {
@@ -11,9 +13,7 @@ namespace iray {
 
     template <accel_types Type>
     struct accelerator : std::false_type {
-        accelerator() = delete;
+        accelerator(scene* scene_ptr) = delete;
     };
 
 } // namespace iray
-
-#include "accel/naive.hpp"

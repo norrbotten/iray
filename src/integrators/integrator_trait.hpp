@@ -3,6 +3,9 @@
 #include <type_traits>
 
 #include "accel/accel_trait.hpp"
+#include "accel/geometry.hpp"
+
+#include "utils/color.hpp"
 
 namespace iray {
 
@@ -10,11 +13,9 @@ namespace iray {
         albedo,
     };
 
-    template <integrator_types Type, accel_types AccelType>
+    template <integrator_types IntegType, accel_types AccelType>
     struct integrator : std::false_type {
-        integrator() = delete;
+        integrator(accelerator<AccelType>* accel) = delete;
     };
 
 } // namespace iray
-
-#include "integrators/albedo.hpp"

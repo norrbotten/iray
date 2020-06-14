@@ -1,20 +1,32 @@
 #pragma once
 
-#include <vector>
+#include <iostream>
+
+#include "accel/geometry.hpp"
 
 #include "accel/accel_trait.hpp"
 #include "integrators/integrator_trait.hpp"
 
-#include "accel/geometry.hpp"
+#include "utils/color.hpp"
 
 namespace iray {
 
     template <accel_types AccelType>
     struct integrator<integrator_types::albedo, AccelType> {
-        accel<AccelType> accelerator;
+        accelerator<AccelType>* accel = nullptr;
 
-        integrator(std::vector<triangle>&& tris)
-            : accelerator(std::move(tris)) {
+        integrator(accelerator<AccelType>* accel)
+            : accel(accel) {
+        }
+
+        color radiance(ray& ray, intersection_result& res) {
+            if (accel->intersects(ray, res)) {
+                float col   = (240.f - res.t) / 240.f;
+                float shade = glm::dot(res.hitnormal, ray.direction * -1.0);
+                return color{col * shade, col * shade, col * shade};
+            }
+
+            return color{0, 0, 0};
         }
     };
 
