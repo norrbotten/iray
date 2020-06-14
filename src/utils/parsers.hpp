@@ -25,9 +25,9 @@ namespace iray {
 
     // the obj format is terrible
     parse_error parse_obj(const char* filename, std::vector<triangle>& result) {
-        typedef std::tuple<float, float, float> obj_vertice;
-        typedef std::tuple<float, float>        obj_texcoord;
-        typedef std::tuple<float, float, float> obj_normal;
+        typedef std::tuple<double, double, double> obj_vertice;
+        typedef std::tuple<double, double>         obj_texcoord;
+        typedef std::tuple<double, double, double> obj_normal;
 
         struct obj_polygon {
             std::vector<int> vertex_indices;
@@ -80,7 +80,7 @@ namespace iray {
             if (ss >> first_word) {
 
                 if (first_word == "v") {
-                    float x, y, z, w;
+                    double x, y, z, w;
 
                     if (!(ss >> x))
                         return fmt_error("invalid vertice x coord");
@@ -97,7 +97,7 @@ namespace iray {
                     parsed_vertices.push_back(std::make_tuple(x * w, y * w, z * w));
                 }
                 else if (first_word == "vt") {
-                    float u, v;
+                    double u, v;
 
                     if (!(ss >> u))
                         return fmt_error("invalid tex u coord");
@@ -108,7 +108,7 @@ namespace iray {
                     parsed_texcoords.push_back(std::make_tuple(u, v));
                 }
                 else if (first_word == "vn") {
-                    float x, y, z;
+                    double x, y, z;
 
                     if (!(ss >> x))
                         return fmt_error("invalid normal x value");
@@ -204,7 +204,7 @@ namespace iray {
                     const bool has_texcoord = parsed_texcoords.size() > 0;
                     const bool has_normal   = parsed_normals.size() > 0;
 
-                    auto calc_normal = [](glm::vec3& p1, glm::vec3& p2, glm::vec3& p3) {
+                    auto calc_normal = [](glm::dvec3& p1, glm::dvec3& p2, glm::dvec3& p3) {
                         return glm::normalize(glm::cross(p3 - p1, p3 - p2));
                     };
 
@@ -221,36 +221,36 @@ namespace iray {
 
                         // this is horrible code, but im not changing it from using tuples
 
-                        vert0.pos = glm::vec3(std::get<0>(parsed_vertices[v0]),
-                                              std::get<1>(parsed_vertices[v0]),
-                                              std::get<2>(parsed_vertices[v0]));
+                        vert0.pos = glm::dvec3(std::get<0>(parsed_vertices[v0]),
+                                               std::get<1>(parsed_vertices[v0]),
+                                               std::get<2>(parsed_vertices[v0]));
 
-                        vert1.pos = glm::vec3(std::get<0>(parsed_vertices[v1]),
-                                              std::get<1>(parsed_vertices[v1]),
-                                              std::get<2>(parsed_vertices[v1]));
+                        vert1.pos = glm::dvec3(std::get<0>(parsed_vertices[v1]),
+                                               std::get<1>(parsed_vertices[v1]),
+                                               std::get<2>(parsed_vertices[v1]));
 
-                        vert2.pos = glm::vec3(std::get<0>(parsed_vertices[v2]),
-                                              std::get<1>(parsed_vertices[v2]),
-                                              std::get<2>(parsed_vertices[v2]));
+                        vert2.pos = glm::dvec3(std::get<0>(parsed_vertices[v2]),
+                                               std::get<1>(parsed_vertices[v2]),
+                                               std::get<2>(parsed_vertices[v2]));
 
                         if (has_texcoord) {
                             const auto t0 = poly.texcoord_indices[0];
                             const auto t1 = poly.texcoord_indices[i];
                             const auto t2 = poly.texcoord_indices[i + 1];
 
-                            vert0.texcoord = glm::vec2(std::get<0>(parsed_texcoords[t0]),
-                                                       std::get<1>(parsed_texcoords[t0]));
+                            vert0.texcoord = glm::dvec2(std::get<0>(parsed_texcoords[t0]),
+                                                        std::get<1>(parsed_texcoords[t0]));
 
-                            vert1.texcoord = glm::vec2(std::get<0>(parsed_texcoords[t1]),
-                                                       std::get<1>(parsed_texcoords[t1]));
+                            vert1.texcoord = glm::dvec2(std::get<0>(parsed_texcoords[t1]),
+                                                        std::get<1>(parsed_texcoords[t1]));
 
-                            vert2.texcoord = glm::vec2(std::get<0>(parsed_texcoords[t2]),
-                                                       std::get<1>(parsed_texcoords[t2]));
+                            vert2.texcoord = glm::dvec2(std::get<0>(parsed_texcoords[t2]),
+                                                        std::get<1>(parsed_texcoords[t2]));
                         }
                         else {
-                            vert0.texcoord = glm::vec2(0, 0);
-                            vert1.texcoord = glm::vec2(1, 0);
-                            vert2.texcoord = glm::vec2(1, 1);
+                            vert0.texcoord = glm::dvec2(0, 0);
+                            vert1.texcoord = glm::dvec2(1, 0);
+                            vert2.texcoord = glm::dvec2(1, 1);
                         }
 
                         if (has_normal) {
@@ -258,17 +258,17 @@ namespace iray {
                             const auto n1 = poly.normal_indices[i];
                             const auto n2 = poly.normal_indices[i + 1];
 
-                            vert0.normal = glm::vec3(std::get<0>(parsed_normals[n0]),
-                                                     std::get<1>(parsed_normals[n0]),
-                                                     std::get<2>(parsed_normals[n0]));
+                            vert0.normal = glm::dvec3(std::get<0>(parsed_normals[n0]),
+                                                      std::get<1>(parsed_normals[n0]),
+                                                      std::get<2>(parsed_normals[n0]));
 
-                            vert1.normal = glm::vec3(std::get<0>(parsed_normals[n1]),
-                                                     std::get<1>(parsed_normals[n1]),
-                                                     std::get<2>(parsed_normals[n1]));
+                            vert1.normal = glm::dvec3(std::get<0>(parsed_normals[n1]),
+                                                      std::get<1>(parsed_normals[n1]),
+                                                      std::get<2>(parsed_normals[n1]));
 
-                            vert2.normal = glm::vec3(std::get<0>(parsed_normals[n2]),
-                                                     std::get<1>(parsed_normals[n2]),
-                                                     std::get<2>(parsed_normals[n2]));
+                            vert2.normal = glm::dvec3(std::get<0>(parsed_normals[n2]),
+                                                      std::get<1>(parsed_normals[n2]),
+                                                      std::get<2>(parsed_normals[n2]));
                         }
                         else {
                             const auto norm = calc_normal(vert0.pos, vert1.pos, vert2.pos);
@@ -286,6 +286,52 @@ namespace iray {
             }
 
             line_no++;
+        }
+
+        return {};
+    }
+
+    parse_error parse_stl(const char* filename, std::vector<triangle>& result) {
+        struct stl_header {
+            uint8_t  header[80];
+            uint32_t num_tris;
+        } __attribute__((packed));
+
+        struct stl_vertex {
+            float x, y, z;
+        } __attribute__((packed));
+
+        struct stl_triangle {
+            float      nx, ny, nz;
+            stl_vertex vert0;
+            stl_vertex vert1;
+            stl_vertex vert2;
+            uint16_t   attrib;
+        } __attribute__((packed));
+
+        std::ifstream infile(filename, std::ios::binary);
+
+        if (!infile.good())
+            return "infile.good() == false";
+
+        stl_header header;
+
+        infile.read((char*)&header, sizeof(header));
+
+        for (unsigned int i = 0; i < header.num_tris && !infile.eof(); i++) {
+            stl_triangle tri;
+            infile.read((char*)&tri, sizeof(tri));
+
+            result.push_back(triangle{
+                vertex{glm::dvec3(tri.vert0.x, tri.vert0.y, tri.vert0.z),
+                       glm::dvec3(tri.nx, tri.ny, tri.nz), glm::dvec2(0, 0)},
+
+                vertex{glm::dvec3(tri.vert1.x, tri.vert1.y, tri.vert1.z),
+                       glm::dvec3(tri.nx, tri.ny, tri.nz), glm::dvec2(1, 0)},
+
+                vertex{glm::dvec3(tri.vert2.x, tri.vert2.y, tri.vert2.z),
+                       glm::dvec3(tri.nx, tri.ny, tri.nz), glm::dvec2(1, 1)},
+            });
         }
 
         return {};

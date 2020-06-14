@@ -1,11 +1,10 @@
 workspace "iray"
-
     language "C++"
     cppdialect "C++17"
 
     location "build"
 
-    buildoptions { "-std=c++2a" }
+    buildoptions { "-std=c++2a", "-march=native" }
 
     configurations { "debug", "release" }
 
@@ -19,16 +18,19 @@ workspace "iray"
         targetdir "build/release/bin"
         objdir "build/release/obj"
         buildoptions { "-O3", "-Werror", "-Wextra", "-Wall", "-Wpedantic" }
-    
+
     filter { }
 
-function includeGLM()
-    includedirs "ext/glm"
-end
+project "lodepng"
+    kind "StaticLib"
+    files { "ext/lodepng/lodepng.cpp", "ext/lodepng/lodepng.h" }
 
 project "iray"
     kind "ConsoleApp"
     files { "src/**.cpp", "src/**.hpp" }
-    includedirs "src/"
 
-    includeGLM()
+    links { "lodepng", "pthread" }
+
+    includedirs "src/"
+    includedirs "ext/glm"
+    includedirs "ext/lodepng"

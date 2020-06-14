@@ -6,11 +6,12 @@ namespace iray {
 
     enum class accel_types {
         naive,
+        naive_avx2,
     };
 
     template <accel_types Type>
-    struct accel : std::false_type {
-        accel() = delete;
+    struct accelerator : std::false_type {
+        accelerator() = delete;
     };
 
 } // namespace iray
