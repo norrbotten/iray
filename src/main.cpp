@@ -17,56 +17,25 @@
 int main() {
     using namespace iray;
 
-    std::vector<triangle> tris;
-    if (auto err = parse_stl("data/eiffel.stl", tris); err.has_value()) {
-        std::cout << err.value() << "\n";
-        return EXIT_FAILURE;
-    }
-
-    std::cout << tris.size() << " triangles loaded\n";
-
     render_settings settings;
-    settings.resolution.width  = 512;
-    settings.resolution.height = 512;
+    settings.resolution.width  = 1024;
+    settings.resolution.height = 1024;
 
     settings.fov = 70.f;
 
-    settings.cam_pos = glm::vec3(-40.0, -40.0, 20.0);
-    settings.cam_aim = glm::vec3(0.0, 0.0, 20.0);
+    settings.cam_pos = glm::vec3(-50.01, -50.0, 40.0);
+    settings.cam_aim = glm::vec3(0.0, 0.0, 36.0);
 
-    auto accel = accelerator<accel_types::naive_avx2>(std::move(tris));
-    auto integ = integrator<integrator_types::albedo, accel_types::naive_avx2>(&accel);
+    scene scene;
+    scene.models.push_back(model{"data/eiffel.stl", glm::dmat4(1.f)});
 
-    int width  = 1024;
-    int height = 1024;
+    render_ctx<accel_types::naive_avx2, integrator_types::albedo> ctx(&settings, &scene);
 
-    camera      cam(width, height);
-    sample_film film(width, height);
+    ctx.render(24);
+    ctx.save("works.png");
 
-    cam.set_pos(glm::dvec3(-60, -60, 60));
-    cam.aim_at(glm::dvec3(0, 0, 48));
-
-    std::mutex cout_mtx;
-
-    auto render_row = [&film, &cam, &accel, &integ, &cout_mtx, width](int y) {
-        for (int x = 0; x < width; x++) {
-            intersection_result res;
-
-            auto ray = cam.camray(x, y);
-            film.splat(x, y, integ.radiance(ray, res));
-        }
-
-        std::lock_guard g(cout_mtx);
-        std::cout << "line " << y << " finished\n";
-    };
-
-    std::vector<std::thread> workers;
-
-    for (int y = 0; y < height; y++)
-        workers.push_back(std::thread(render_row, y));
-
-    for (auto& worker : workers)
-        worker.join();
-
-    film.save_png("eiffel_avx2.png");
+    // 139,448 triangles * 1024^2 pixels = 146,221,826,048 ray vs triangle tests
+    // rendered in 9.44851 seconds on 24 threads
+    // 146,221,826,048/9.44851 = 15,475,649,181 tests/second
+    // 15.5 billion ray/triangle tests a second, without any acceleration structure
 }

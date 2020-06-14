@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include "accel/geometry.hpp"
 
 #include "accel/accel_trait.hpp"
@@ -19,7 +17,9 @@ namespace iray {
             : accel(accel) {
         }
 
-        color radiance(ray& ray, intersection_result& res) {
+        color radiance(ray& ray) {
+            intersection_result res;
+
             if (accel->intersects(ray, res)) {
                 float col   = (240.f - res.t) / 240.f;
                 float shade = glm::dot(res.hitnormal, ray.direction * -1.0);
