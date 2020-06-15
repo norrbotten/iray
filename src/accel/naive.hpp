@@ -16,8 +16,6 @@ namespace iray {
     struct accelerator<accel_types::naive> {
         std::vector<triangle> triangles;
 
-        accel_diagnostics diag;
-
         accelerator(std::vector<triangle>&& tris) {
             triangles = tris;
             tris.clear();

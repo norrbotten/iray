@@ -94,7 +94,7 @@ namespace iray {
                     if (!(ss >> w))
                         w = 1;
 
-                    parsed_vertices.push_back(std::make_tuple(x * w, y * w, z * w));
+                    parsed_vertices.push_back(std::make_tuple(x * w, z * w, y * w));
                 }
                 else if (first_word == "vt") {
                     double u, v;
@@ -124,7 +124,7 @@ namespace iray {
                     y *= inv_len;
                     z *= inv_len;
 
-                    parsed_normals.push_back(std::make_tuple(x, y, z));
+                    parsed_normals.push_back(std::make_tuple(x, z, y));
                 }
                 else if (first_word == "vp") {
                     continue;

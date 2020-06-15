@@ -10,6 +10,7 @@ namespace iray {
     enum class accel_types {
         naive,
         naive_avx2,
+        kdtree,
     };
 
     template <accel_types Type>

@@ -104,8 +104,10 @@ namespace iray {
 
             auto time_start = std::chrono::high_resolution_clock::now();
 
+            std::mutex cerr_mtx;
+
             for (int i = 0; i < num_threads; i++) {
-                workers.push_back(std::thread([this, get_block]() {
+                workers.push_back(std::thread([this, get_block, &cerr_mtx]() {
                     while (true) {
                         auto maybe_block = get_block();
 
@@ -121,11 +123,14 @@ namespace iray {
                             }
                         }
 
+                        std::lock_guard g(cerr_mtx);
+                        std::cerr << "[render_ctx::render thread#" << std::this_thread::get_id()
+                                  << "] finished block [" << block.start_x << ", " << block.start_y
+                                  << ", " << block.end_x << ", " << block.end_y << "], "
+                                  << this->blocks.size() << " left\n";
+
                         block.status = block_status::FINISHED;
                     }
-
-                    std::cerr << "[render_ctx::render thread#" << std::this_thread::get_id()
-                              << "] finished\n";
                 }));
             }
 

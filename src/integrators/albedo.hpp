@@ -21,7 +21,7 @@ namespace iray {
             intersection_result res;
 
             if (accel->intersects(ray, res)) {
-                float col   = (240.f - res.t) / 240.f;
+                float col   = (740.f - res.t) / 740.f;
                 float shade = glm::dot(res.hitnormal, ray.direction * -1.0);
                 return color{col * shade, col * shade, col * shade};
             }
