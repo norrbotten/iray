@@ -16,6 +16,7 @@
 
 #include "utils/camera.hpp"
 #include "utils/film.hpp"
+#include "utils/num_fmt.hpp"
 
 namespace iray {
 
@@ -141,6 +142,14 @@ namespace iray {
             auto dur      = std::chrono::duration<double>(time_end - time_start);
 
             std::cerr << "[render_ctx::render] render finished in " << dur.count() << "s\n";
+
+            double effective_tris_per_second = (double)this->settings->resolution.width *
+                                               (double)this->settings->resolution.height *
+                                               (double)this->scene_ptr->num_triangles / dur.count();
+
+            std::cerr << "[render_ctx::render] intersected "
+                      << iray::fmt::sscale(effective_tris_per_second, 3)
+                      << " effective tris/second\n";
         }
 
         void save(const char* filename) {

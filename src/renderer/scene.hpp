@@ -22,6 +22,8 @@ namespace iray {
         std::vector<model>    models;
         std::vector<triangle> triangles;
 
+        std::size_t num_triangles;
+
         void build() {
             for (auto& model : models) {
                 std::filesystem::path path(model.filename);
@@ -47,6 +49,8 @@ namespace iray {
                     triangles.push_back(tri);
                 }
             }
+
+            num_triangles = triangles.size();
         }
     };
 

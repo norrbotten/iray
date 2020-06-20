@@ -11,6 +11,8 @@ namespace iray {
         naive,
         naive_avx2,
         kdtree,
+        axisaligned_bsp,
+        axisaligned_bsp_avx2,
     };
 
     template <accel_types Type>

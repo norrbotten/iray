@@ -11,6 +11,8 @@
 #include "accel/accel_trait.hpp"
 #include "accel/geometry.hpp"
 
+#include "utils/math.hpp"
+
 namespace iray {
 
     // Naive "accelerator" using AVX2, intersects 8 triangles at once
@@ -52,19 +54,13 @@ namespace iray {
         return ((float*)(&x))[n];
     }
 
-    const __m256 one_m256       = _mm256_set1_ps(1.0f);
-    const __m256 minus_one_m256 = _mm256_set1_ps(-1.0f);
-    const __m256 pos_eps_m256   = _mm256_set1_ps(1e-9f);
-    const __m256 neg_eps_m256   = _mm256_set1_ps(-1e-9f);
-    const __m256 zero_m256      = _mm256_set1_ps(0.0f);
-
     template <>
     struct accelerator<accel_types::naive_avx2> {
         std::vector<avx2_packed_triangles> packed_triangles;
 
         accelerator(std::vector<triangle>&& tris) {
             const auto N = tris.size();
-            packed_triangles.reserve(N);
+            packed_triangles.reserve(N / 8);
 
             for (unsigned int i = 0; i < N; i += 8) {
                 glm::vec3 edge1[8];

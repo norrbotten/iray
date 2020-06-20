@@ -10,6 +10,8 @@
 #include "accel/accel_trait.hpp"
 #include "accel/geometry.hpp"
 
+#include "utils/math.hpp"
+
 namespace iray {
 
     // Accelerator using a crappy kdtree implementation i wrote in lua years ago
@@ -49,59 +51,6 @@ namespace iray {
         return shit_hash(tri.p0.pos) ^ shit_hash(tri.p1.pos) ^ shit_hash(tri.p2.pos);
     }
 
-    bool kd_ray_vs_tri(const glm::dvec3& orig, const glm::dvec3& dir, const triangle& tri,
-                       double& t) {
-
-        auto v0v1 = tri.p1.pos - tri.p0.pos;
-        auto v0v2 = tri.p2.pos - tri.p0.pos;
-        auto pvec = glm::cross(dir, v0v2);
-
-        auto det = glm::dot(v0v1, pvec);
-
-        if (std::fabs(det) < 1e-9)
-            return false;
-
-        auto inv_det = 1.0 / det;
-
-        auto tvec = orig - tri.p0.pos;
-        auto qvec = glm::cross(tvec, v0v1);
-
-        auto u = glm::dot(tvec, pvec) * inv_det;
-        auto v = glm::dot(dir, qvec) * inv_det;
-
-        if ((u < 0) | (u > 1) | (v < 0) | (u + v > 1))
-            return false;
-
-        t = glm::dot(v0v2, qvec) * inv_det;
-
-        return true;
-    }
-
-    bool kd_ray_vs_aabb(const glm::dvec3& orig, const glm::dvec3& dir, const glm::dvec3& vmin,
-                        const glm::dvec3& vmax, double& t) {
-
-        auto rdx = 1.0 / dir.x;
-        auto rdy = 1.0 / dir.y;
-        auto rdz = 1.0 / dir.z;
-
-        auto t1 = (vmin.x - orig.x) * rdx;
-        auto t2 = (vmax.x - orig.x) * rdx;
-        auto t3 = (vmin.y - orig.y) * rdy;
-        auto t4 = (vmax.y - orig.y) * rdy;
-        auto t5 = (vmin.z - orig.z) * rdz;
-        auto t6 = (vmax.z - orig.z) * rdz;
-
-        auto t7 = std::max(std::min(t1, t2), std::max(std::min(t3, t4), std::min(t5, t6)));
-        auto t8 = std::min(std::max(t1, t2), std::min(std::max(t3, t4), std::max(t5, t6)));
-
-        if (t8 < 0.0 || t8 < t7)
-            return false;
-
-        t = t7;
-
-        return true;
-    }
-
     struct kd_node {
         glm::dvec3 bbox_min = glm::dvec3();
         glm::dvec3 bbox_max = glm::dvec3();
@@ -127,7 +76,7 @@ namespace iray {
             return false;
 
         double dummy;
-        if (kd_ray_vs_aabb(orig, dir, kd->bbox_min, kd->bbox_max, dummy)) {
+        if (ray_vs_aabb(orig, dir, kd->bbox_min, kd->bbox_max, dummy)) {
 
             if (kd->left != nullptr || kd->right != nullptr) { // not at a leaf
                 auto t_left  = kd_ray_vs_kdtree(orig, dir, kd->left, t, hit_tri);
@@ -136,21 +85,26 @@ namespace iray {
                 return t_left || t_right;
             }
             else {
-                bool   hit   = false;
-                double t_min = std::numeric_limits<double>::max();
+                bool      hit     = false;
+                double    t_min   = std::numeric_limits<double>::max();
+                triangle* tri_ptr = nullptr;
 
                 for (auto& tri : kd->tris) {
                     double t_tri;
-                    if (kd_ray_vs_tri(orig, dir, tri, t_tri)) {
+                    if (ray_vs_tri(orig, dir, tri, t_tri)) {
                         hit = true;
 
                         if (t_tri < t_min) {
                             t_min = t_tri;
-                            t     = t_tri;
 
-                            *hit_tri = std::addressof(tri);
+                            tri_ptr = std::addressof(tri);
                         }
                     }
+                }
+
+                if (t_min < t) {
+                    *hit_tri = tri_ptr;
+                    t        = t_min;
                 }
 
                 return hit;
@@ -273,7 +227,7 @@ namespace iray {
         }
 
         bool intersects(ray& ray, intersection_result& res) {
-            double    t;
+            double    t   = std::numeric_limits<double>::max();
             triangle* tri = nullptr;
 
             if (kd_ray_vs_kdtree(ray.origin, ray.direction, root_node, t, &tri)) {
